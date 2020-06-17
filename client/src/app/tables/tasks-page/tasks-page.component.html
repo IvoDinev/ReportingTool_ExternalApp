@@ -1,0 +1,22 @@
+<table class="aui">
+    <thead>
+        <tr>
+            <th id="task-number">Task number</th>
+            <th id="type">Type (FE/BE)</th>
+            <th id="developer">Developer</th>
+            <th id="reviewer">Reviewer</th>
+            <th id="status">Status</th>
+            <th id="time-elapsed">Time elapsed</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let task of tasksArray">
+            <td headers="task-number" class="number">{{ task.taskNumber }}</td>
+            <td headers="type" class="number">{{ task.type }}</td>
+            <td headers="developer">{{ task.developer }}</td>
+            <td headers="reviewer">{{ task.reviewer }}</td>
+            <td headers="status">{{ task.status }}</td>
+            <td headers="time-elapsed">{{ task.timeElapsed }} day(s)</td>
+        </tr>
+    </tbody>
+</table>

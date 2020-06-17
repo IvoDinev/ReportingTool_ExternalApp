@@ -1,0 +1,11 @@
+.navbar {
+    justify-content: left;
+}
+
+label {
+    color: white;
+    margin-top: auto;
+    margin-right: 5%;
+    margin-left: 10px;
+    font-size: larger;
+}

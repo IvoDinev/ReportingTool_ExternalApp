@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a
+                    class="nav-link"
+                    style="padding-left: 10px;"
+                    href="#"
+                    (click)="selectTab('project')"
+                    >Project Report</a
+                >
+            </li>
+            <li class="nav-item">
+                <a
+                    class="nav-link"
+                    style="margin-left: 10px; margin-right: 10px;"
+                    href="#"
+                    (click)="selectTab('tasks')"
+                    >Tasks Report</a
+                >
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" (click)="selectTab('sprints')"
+                    >Sprints Report</a
+                >
+            </li>
+        </ul>
+    </div>
+    <div class="float-right" style="margin-right: 5%;">
+        <button
+            class="aui-button aui-dropdown2-trigger"
+            aria-controls="dropdown"
+        >
+            Manage
+        </button>
+        <aui-dropdown-menu id="dropdown">
+            <aui-item-link href="#">Update report</aui-item-link>
+            <aui-item-link href="#">Send to external app</aui-item-link>
+        </aui-dropdown-menu>
+    </div>
+</nav>

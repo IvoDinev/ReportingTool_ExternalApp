@@ -1,0 +1,39 @@
+<div class="container-fluid">
+    <label>Project members count: {{ project.members }}</label>
+    <br />
+    <label>Tasks created: {{ project.createdTasks }}</label>
+    <br />
+    <label>Tasks finished: {{ project.finishedTasks }}</label>
+    <br />
+    <label>Tasks in progress: {{ project.inProgressTasks }}</label>
+    <hr />
+    <a
+        href="#"
+        id="replace-text-trigger"
+        data-replace-text="Hide detailed report"
+        class="aui-expander-trigger"
+        aria-controls="expander-with-replace-text-content"
+        >Show detailed report</a
+    >
+    <div
+        style="margin-top: 10px;"
+        id="expander-with-replace-text-content"
+        class="aui-expander-content"
+    >
+        <label
+            >Average days spent on task:
+            {{ project.avgDaysPerTask }} day(s)</label
+        >
+        <br />
+        <label
+            >Average tasks per sprint completed:
+            {{ project.avgCompletedSprintTasks }}</label
+        >
+        <br />
+        <label
+            >Completed / planned tasks per sprint:
+            {{ project.completedPlannedTasksSprint }}%</label
+        >
+        <br />
+    </div>
+</div>

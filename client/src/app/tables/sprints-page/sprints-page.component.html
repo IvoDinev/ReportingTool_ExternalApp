@@ -1,0 +1,30 @@
+<table class="aui">
+    <thead>
+        <tr>
+            <th id="sprint-name">Sprint number</th>
+            <th id="sprint-phase">Sprint phase</th>
+            <th id="planned-tasks">Planned tasks</th>
+            <th id="inProgress-tasks">Tasks in progress</th>
+            <th id="finished-tasks">Finished tasks</th>
+            <th id="sprint-day">Sprint day</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let sprint of sprintsArray">
+            <td headers="sprint-name" class="number">
+                {{ sprint.sprintNumber }}
+            </td>
+            <td headers="sprint-phase">{{ sprint.phase }}</td>
+            <td headers="planned-tasks" class="number">
+                {{ sprint.plannedTasks }}
+            </td>
+            <td headers="inProgress-tasks" class="number">
+                {{ sprint.tasksInProgress }}
+            </td>
+            <td headers="finished-tasks" class="number">
+                {{ sprint.finishedTasks }}
+            </td>
+            <td headers="sprint-day">{{ sprint.day }}</td>
+        </tr>
+    </tbody>
+</table>
