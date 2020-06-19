@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DataService } from '../../services/data.service';
 
 @Component({
     selector: 'app-overview-page',
@@ -6,7 +7,11 @@ import { Component, OnInit } from '@angular/core';
     styleUrls: ['./overview-page.component.css'],
 })
 export class OverviewPageComponent implements OnInit {
-    constructor() {}
+    constructor(private dataService: DataService) {}
 
-    ngOnInit() {}
+    ngOnInit() {
+        this.dataService.checkLoggedUser().subscribe((response) => {
+            console.log(response);
+        });
+    }
 }
