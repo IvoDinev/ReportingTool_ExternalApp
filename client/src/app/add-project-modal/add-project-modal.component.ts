@@ -87,4 +87,6 @@ export class AddProjectModalComponent implements OnInit {
     changeDomain() {
         this.isAuthenticated = false;
     }
+
+    onAddProject() {}
 }
