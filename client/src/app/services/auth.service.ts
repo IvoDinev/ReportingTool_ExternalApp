@@ -125,7 +125,37 @@ export class AuthService {
         return throwError(errorMessage);
     }
 
+    storeProjectCredentials(projectCredentials) {
+        const credentials = {
+            username: projectCredentials.username,
+            password: projectCredentials.password,
+        };
+
+        return this.http.put(
+            `https://reportin-app---authentication.firebaseio.com/projects/${projectCredentials.projectKey}.json`,
+            credentials
+        );
+    }
+
+    getProjectCredentials() {
+        return this.http.get<any>(
+            `https://reportin-app---authentication.firebaseio.com/projects.json`
+        );
+    }
+
     encodeCredentials(username: string, password: string) {
         return btoa(`${username}:${password}`);
+    }
+
+    checkProjectCredentials(user: string, pass: string) {
+        const encodedCredentials = this.encodeCredentials(user, pass);
+        const httpOptions = {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                Authorization: `Basic ${encodedCredentials}`,
+            }),
+        };
+        const url = `/jira/rest/auth/1/session`;
+        return this.http.get(url, httpOptions);
     }
 }

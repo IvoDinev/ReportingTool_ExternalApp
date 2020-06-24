@@ -28,8 +28,7 @@ export class AuthComponent implements OnInit {
                     this.loginForm.controls.password.value
                 )
                 .subscribe(
-                    (response) => {
-                        console.log(response);
+                    () => {
                         this.router.navigate(['/overview']);
                     },
                     (error) => {

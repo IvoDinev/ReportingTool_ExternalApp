@@ -29,76 +29,119 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form [formGroup]="addProjectForm" (ngSubmit)="onSubmit()">
-                <div class="modal-body">
-                    <div class="form-group row">
-                        <label for="projectKey" class="col-sm-3 col-form-label"
-                            >ProjectKey</label
-                        >
-                        <div class="col-sm-9">
-                            <input
-                                formControlName="projectKey"
-                                type="email"
-                                class="form-control"
-                                id="projectKey"
-                            />
+            <div *ngIf="!isAuthenticated">
+                <form
+                    [formGroup]="domainLoginForm"
+                    (ngSubmit)="onAuthenticate()"
+                >
+                    <div class="modal-body">
+                        <div class="form-group row" style="margin-top: 10px;">
+                            <label
+                                for="username"
+                                class="col-sm-3 col-form-label"
+                                >Username</label
+                            >
+                            <div class="col-sm-9">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="username"
+                                    formControlName="username"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group row" style="margin-top: 10px;">
+                            <label
+                                for="password"
+                                class="col-sm-3 col-form-label"
+                                >Password</label
+                            >
+                            <div class="col-sm-9">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="password"
+                                    formControlName="password"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group row" style="margin-top: 10px;">
+                            <label
+                                for="domain"
+                                class="col-sm-3 col-form-label col-form-label"
+                                >Domain</label
+                            >
+                            <div class="col-sm-9">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="domain"
+                                    formControlName="domain"
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group row" style="margin-top: 10px;">
-                        <label for="username" class="col-sm-3 col-form-label"
-                            >Username</label
+                    <div *ngIf="error" class="alert alert-danger">
+                        <p>{{ error }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
                         >
-                        <div class="col-sm-9">
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="username"
-                                formControlName="username"
-                            />
+                            Close
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Login to domain
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div *ngIf="isAuthenticated">
+                <form [formGroup]="addProjectForm" (ngSubmit)="onAddProject()">
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label
+                                for="projectKey"
+                                class="col-sm-3 col-form-label"
+                                >ProjectKey</label
+                            >
+                            <div class="col-sm-9">
+                                <input
+                                    formControlName="projectKey"
+                                    type="email"
+                                    class="form-control"
+                                    id="projectKey"
+                                />
+                            </div>
+                            <div class="col-sm-2"></div>
                         </div>
                     </div>
-                    <div class="form-group row" style="margin-top: 10px;">
-                        <label for="password" class="col-sm-3 col-form-label"
-                            >Password</label
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
                         >
-                        <div class="col-sm-9">
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="password"
-                                formControlName="password"
-                            />
-                        </div>
+                            Close
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            Add Project
+                        </button>
                     </div>
-                    <div class="form-group row" style="margin-top: 10px;">
-                        <label
-                            for="domain"
-                            class="col-sm-3 col-form-label col-form-label"
-                            >Domain</label
-                        >
-                        <div class="col-sm-9">
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="domain"
-                                formControlName="domain"
-                            />
-                        </div>
-                    </div>
+                </form>
+                <div
+                    style="
+                        cursor: pointer;
+                        text-align: right;
+                        font-size: larger;
+                        margin-right: 15px;
+                    "
+                >
+                    <a (click)="changeDomain()">Login to another domain</a>
                 </div>
-                <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-dismiss="modal"
-                    >
-                        Close
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        Add
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
