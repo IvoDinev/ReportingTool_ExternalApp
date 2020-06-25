@@ -8,13 +8,8 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-    loadedTab = 'project';
     isAuthenticated = false;
     private userSub: Subscription;
-
-    onNavigate(tab: string) {
-        this.loadedTab = tab;
-    }
 
     constructor(private authService: AuthService) {}
 

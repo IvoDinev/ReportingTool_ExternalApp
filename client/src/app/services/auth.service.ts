@@ -21,11 +21,6 @@ export class AuthService {
     constructor(private http: HttpClient, private router: Router) {}
 
     loginUser(mail: string, pass: string) {
-        const httpOptions = {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json',
-            }),
-        };
         const body = {
             email: mail,
             password: pass,
@@ -34,8 +29,7 @@ export class AuthService {
         return this.http
             .post<UserAuthResponse>(
                 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBKepAQ17F7Eyysp6HHWsIqQu72miZMSeY',
-                body,
-                httpOptions
+                body
             )
             .pipe(
                 catchError(this.handleError),
@@ -154,6 +148,11 @@ export class AuthService {
     }
 
     checkDomainCredentials(user: string, pass: string) {
+        const url = `/jira/rest/auth/1/session`;
+        return this.http.get(url, this.setDomainRequestHeaders(user, pass));
+    }
+
+    setDomainRequestHeaders(user: string, pass: string) {
         const encodedCredentials = this.encodeCredentials(user, pass);
         const httpOptions = {
             headers: new HttpHeaders({
@@ -161,7 +160,7 @@ export class AuthService {
                 Authorization: `Basic ${encodedCredentials}`,
             }),
         };
-        const url = `/jira/rest/auth/1/session`;
-        return this.http.get(url, httpOptions);
+
+        return httpOptions;
     }
 }
