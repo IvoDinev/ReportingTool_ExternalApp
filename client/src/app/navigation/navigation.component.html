@@ -1,7 +1,4 @@
-<nav
-    class="navbar navbar-expand-sm navbar-dark"
-    style="background-color: #0747a6;"
->
+<nav class="navbar navbar-expand-sm navbar-dark">
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">
             <label for="search">Search</label>
@@ -14,13 +11,9 @@
         </ul>
         <form class="form-inline my-2 my-lg-0">
             <add-project-modal></add-project-modal>
+            <button class="btn btn-danger" (click)="logout()">
+                Logout
+            </button>
         </form>
-        <ul class="nav navbar-nav navbar-right">
-            <li>
-                <button class="btn btn-danger" (click)="logout()">
-                    Logout
-                </button>
-            </li>
-        </ul>
     </div>
 </nav>

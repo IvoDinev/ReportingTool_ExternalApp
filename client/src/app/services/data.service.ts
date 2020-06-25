@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { ProjectCredentials } from '../interfaces/projectCredentials';
 
 @Injectable({
     providedIn: 'root',
@@ -10,10 +9,10 @@ import { ProjectCredentials } from '../interfaces/projectCredentials';
 export class DataService {
     constructor(private http: HttpClient, private authService: AuthService) {}
 
-    getProject(projectCredentials: ProjectCredentials) {
+    getAllProjects(user: string, pass: string) {
         const encodedCredentials = this.authService.encodeCredentials(
-            projectCredentials.username,
-            projectCredentials.password
+            user,
+            pass
         );
         const httpOptions = {
             headers: new HttpHeaders({
@@ -21,7 +20,7 @@ export class DataService {
                 Authorization: `Basic ${encodedCredentials}`,
             }),
         };
-        const url = `/jira/rest/api/2/project/${projectCredentials.projectKey}`;
+        const url = `/jira/rest/api/2/project`;
         return this.http.get(url, httpOptions);
     }
 }

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataService } from '../services/data.service';
 import { AuthService } from '../services/auth.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DomainCredentials } from '../interfaces/domainCredentials';
 
 @Component({
     // tslint:disable-next-line: component-selector
@@ -12,27 +14,37 @@ import { AuthService } from '../services/auth.service';
 export class AddProjectModalComponent implements OnInit {
     error = null;
     isAuthenticated = false;
+    closeResult = '';
 
     constructor(
         private dataService: DataService,
-        private authService: AuthService
+        private authService: AuthService,
+        private modalService: NgbModal
     ) {}
     domainLoginForm = new FormGroup({
         username: new FormControl('', Validators.required),
         password: new FormControl('', Validators.required),
         domain: new FormControl('', Validators.required),
     });
-    addProjectForm = new FormGroup({
-        projectKey: new FormControl('', Validators.required),
-    });
 
     ngOnInit() {}
 
+    open(content) {
+        this.modalService
+            .open(content, { ariaLabelledBy: 'modal-basic-title' })
+            .result.then(
+                () => {
+                    this.closeResult = `Closed`;
+                },
+                () => {
+                    this.closeResult = `Dismissed`;
+                }
+            );
+    }
+
     onAuthenticate() {
         if (this.domainLoginForm.valid) {
-            if (this.isAuthenticated === false) {
-                this.authenticateInDomain();
-            }
+            this.authenticateInDomain();
         } else {
             alert('Populate the required fields');
         }
@@ -42,17 +54,22 @@ export class AddProjectModalComponent implements OnInit {
         const credentials = {
             username: this.domainLoginForm.controls.username.value,
             password: this.domainLoginForm.controls.password.value,
+            domain: this.domainLoginForm.controls.domain.value,
         };
         this.checkCredentials(credentials);
     }
 
-    checkCredentials(credentials) {
+    checkCredentials(credentials: DomainCredentials) {
         this.authService
-            .checkProjectCredentials(credentials.username, credentials.password)
+            .checkDomainCredentials(credentials.username, credentials.password)
             .subscribe(
                 (response) => {
                     if (response) {
                         this.isAuthenticated = true;
+                        this.authService
+                            .storeDomainCredentials(credentials)
+                            .subscribe();
+                        this.addProjects();
                     }
                 },
                 (error) => {
@@ -65,28 +82,35 @@ export class AddProjectModalComponent implements OnInit {
             );
     }
 
-    getProjectData(projectCredentials) {
-        this.dataService.getProject(projectCredentials).subscribe(
-            (response) => {
-                if (response) {
-                    console.log(response);
-                }
-            },
-            (error) => {
-                if (error.status === 404) {
-                    this.error = 'No project found with this project Key!';
-                } else if (error.status === 401) {
-                    this.error = 'Invalid username or password!';
-                } else {
-                    this.error = error.status;
-                }
-            }
-        );
+    addProjects() {
+        if (this.isAuthenticated) {
+            this.dataService
+                .getAllProjects(
+                    this.domainLoginForm.controls.username.value,
+                    this.domainLoginForm.controls.password.value
+                )
+                .subscribe(
+                    (project) => {
+                        if (project) {
+                            console.log(project);
+                            this.error = null;
+                            this.domainLoginForm.controls.username.setValue('');
+                            this.domainLoginForm.controls.password.setValue('');
+                            this.domainLoginForm.controls.domain.setValue('');
+                            this.modalService.dismissAll();
+                        }
+                    },
+                    (error) => {
+                        if (error.status === 404) {
+                            this.error =
+                                'No project found with this project Key!';
+                        } else if (error.status === 401) {
+                            this.error = 'Invalid username or password!';
+                        } else {
+                            this.error = error.status;
+                        }
+                    }
+                );
+        }
     }
-
-    changeDomain() {
-        this.isAuthenticated = false;
-    }
-
-    onAddProject() {}
 }

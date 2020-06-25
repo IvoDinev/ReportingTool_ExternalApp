@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from '../../services/data.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { ProjectCredentials } from 'src/app/interfaces/projectCredentials';
+import { DomainCredentials } from 'src/app/interfaces/domainCredentials';
 
 @Component({
     selector: 'app-overview-page',
@@ -9,39 +8,20 @@ import { ProjectCredentials } from 'src/app/interfaces/projectCredentials';
     styleUrls: ['./overview-page.component.css'],
 })
 export class OverviewPageComponent implements OnInit {
-    constructor(
-        private dataService: DataService,
-        private authService: AuthService
-    ) {}
+    constructor(private authService: AuthService) {}
 
     ngOnInit() {
-        this.authService.getProjectCredentials().subscribe(
-            (projects: Array<ProjectCredentials>) => {
-                if (projects) {
-                    this.getExistingProjects(projects);
+        this.authService.getDomainCredentials().subscribe(
+            (domains: Array<DomainCredentials>) => {
+                if (domains) {
+                    console.log(domains);
                 } else {
-                    window.alert('No projects available !');
+                    window.alert('No projects added yet !');
                 }
             },
             (error) => {
                 console.log(error);
             }
         );
-    }
-
-    getExistingProjects(projects: Array<ProjectCredentials>) {
-        // tslint:disable-next-line: forin
-        for (const project in projects) {
-            const projectCredentials: ProjectCredentials = {
-                projectKey: project,
-                username: projects[project].username,
-                password: projects[project].password,
-            };
-            this.dataService
-                .getProject(projectCredentials)
-                .subscribe((response) => {
-                    console.log(response);
-                });
-        }
     }
 }

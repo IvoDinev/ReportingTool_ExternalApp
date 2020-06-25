@@ -6,9 +6,10 @@ import {
 } from '@angular/common/http';
 import { UserAuthResponse } from '../interfaces/user-auth-responseData';
 import { throwError, BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, take, exhaustMap } from 'rxjs/operators';
 import { User } from '../interfaces/user.model';
 import { Router } from '@angular/router';
+import { DomainCredentials } from '../interfaces/domainCredentials';
 
 @Injectable({
     providedIn: 'root',
@@ -33,7 +34,7 @@ export class AuthService {
         return this.http
             .post<UserAuthResponse>(
                 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBKepAQ17F7Eyysp6HHWsIqQu72miZMSeY',
-                JSON.stringify(body),
+                body,
                 httpOptions
             )
             .pipe(
@@ -125,21 +126,26 @@ export class AuthService {
         return throwError(errorMessage);
     }
 
-    storeProjectCredentials(projectCredentials) {
-        const credentials = {
-            username: projectCredentials.username,
-            password: projectCredentials.password,
+    storeDomainCredentials(domainCredentials: DomainCredentials) {
+        const body = {
+            username: domainCredentials.username,
+            password: domainCredentials.password,
         };
-
-        return this.http.put(
-            `https://reportin-app---authentication.firebaseio.com/projects/${projectCredentials.projectKey}.json`,
-            credentials
+        return this.user.pipe(
+            take(1),
+            exhaustMap((user) => {
+                return this.http.put(
+                    `https://reportin-app---authentication.firebaseio.com/domains/${domainCredentials.domain}.json?auth=` +
+                        user.token,
+                    body
+                );
+            })
         );
     }
 
-    getProjectCredentials() {
+    getDomainCredentials() {
         return this.http.get<any>(
-            `https://reportin-app---authentication.firebaseio.com/projects.json`
+            `https://reportin-app---authentication.firebaseio.com/domains.json`
         );
     }
 
@@ -147,7 +153,7 @@ export class AuthService {
         return btoa(`${username}:${password}`);
     }
 
-    checkProjectCredentials(user: string, pass: string) {
+    checkDomainCredentials(user: string, pass: string) {
         const encodedCredentials = this.encodeCredentials(user, pass);
         const httpOptions = {
             headers: new HttpHeaders({

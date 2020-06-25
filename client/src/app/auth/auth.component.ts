@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 export class AuthComponent implements OnInit {
     constructor(private authService: AuthService, private router: Router) {}
     loginForm: FormGroup;
+    error = null;
 
     ngOnInit() {
         this.loginForm = new FormGroup({
@@ -20,7 +21,7 @@ export class AuthComponent implements OnInit {
     }
     onSubmit() {
         if (!this.loginForm.valid) {
-            alert('Please enter username and password!');
+            alert('Please enter e-mail and password!');
         } else {
             this.authService
                 .loginUser(
@@ -32,7 +33,7 @@ export class AuthComponent implements OnInit {
                         this.router.navigate(['/overview']);
                     },
                     (error) => {
-                        console.log(error);
+                        this.error = error;
                     }
                 );
         }
