@@ -1,59 +1,80 @@
-<button
-    type="button"
-    class="btn btn-success"
-    data-toggle="modal"
-    data-target="#exampleModal"
->
-    Add Project
+<button type="button" class="btn btn-success" (click)="open(content)">
+    Add Projects
 </button>
-<div
-    class="modal fade"
-    id="exampleModal"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
->
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form [formGroup]="addProjectForm" (ngSubmit)="onSubmit()">
-                <div class="modal-header">
-                    <h2 class="modal-title" id="exampleModalLabel">
-                        Add project
-                    </h2>
-                    <button
-                        type="button"
-                        class="close"
-                        data-dismiss="modal"
-                        aria-label="Close"
-                    >
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h4 style="display: inline; margin-right: 5px;">
-                        Enter Project Key
-                    </h4>
-                    <input
-                        style="display: inline;"
-                        type="text"
-                        class="form-control"
-                        formControlName="projectKey"
-                    />
-                </div>
-                <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-dismiss="modal"
-                    >
-                        Close
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        Add
-                    </button>
-                </div>
-            </form>
-        </div>
+<ng-template #content let-modal>
+    <div class="modal-header">
+        <h2 class="modal-title">
+            Add projects from domain
+        </h2>
+        <button
+            type="button"
+            class="close"
+            aria-label="Close"
+            (click)="modal.dismiss()"
+        >
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
-</div>
+    <div>
+        <form [formGroup]="domainLoginForm" (ngSubmit)="onAuthenticate()">
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="username" class="col-sm-3 col-form-label"
+                        >Username</label
+                    >
+                    <div class="col-sm-9">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="username"
+                            formControlName="username"
+                        />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="password" class="col-sm-3 col-form-label"
+                        >Password</label
+                    >
+                    <div class="col-sm-9">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="password"
+                            formControlName="password"
+                        />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label
+                        for="domain"
+                        class="col-sm-3 col-form-label col-form-label"
+                        >Domain of the projects</label
+                    >
+                    <div class="col-sm-9">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="domain"
+                            formControlName="domain"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="error" class="alert alert-danger">
+                <p>{{ error }}</p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    (click)="modal.dismiss()"
+                >
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Add projects
+                </button>
+            </div>
+        </form>
+    </div>
+</ng-template>

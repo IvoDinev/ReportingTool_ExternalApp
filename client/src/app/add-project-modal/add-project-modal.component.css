@@ -2,3 +2,18 @@
     font-size: larger;
     margin-right: 10px;
 }
+
+.form-control {
+    width: 100%;
+}
+
+.form-group.row {
+    margin-top: 10px;
+}
+
+#changeDomain {
+    cursor: pointer;
+    text-align: right;
+    font-size: larger;
+    margin-right: 15px;
+}

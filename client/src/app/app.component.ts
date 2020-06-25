@@ -1,15 +1,26 @@
-import { Component } from '@angular/core';
-import { VERSION } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AuthService } from './services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-    loadedTab = 'project';
+export class AppComponent implements OnInit, OnDestroy {
+    isAuthenticated = false;
+    private userSub: Subscription;
 
-    onNavigate(tab: string) {
-        this.loadedTab = tab;
+    constructor(private authService: AuthService) {}
+
+    ngOnInit() {
+        this.userSub = this.authService.user.subscribe((user) => {
+            this.isAuthenticated = !user ? false : true;
+        });
+        this.authService.autoLogin();
+    }
+
+    ngOnDestroy() {
+        this.userSub.unsubscribe();
     }
 }
