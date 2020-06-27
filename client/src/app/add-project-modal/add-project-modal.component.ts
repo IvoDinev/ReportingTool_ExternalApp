@@ -68,42 +68,38 @@ export class AddProjectModalComponent implements OnInit {
     }
 
     checkCredentials(credentials: DomainCredentials) {
-        if (!this.authService.domainAdded(credentials.domain)) {
-            this.authService
-                .checkDomainCredentials(
-                    credentials.username,
-                    credentials.password,
-                    credentials.domain
-                )
-                .subscribe(
-                    (response) => {
-                        if (response) {
-                            this.isAuthenticated = true;
-                            const obj = {
-                                domain: credentials.domain,
-                                credentials: {
-                                    username: credentials.username,
-                                    password: credentials.password,
-                                },
-                            };
-                            this.authService.domainsArray.push(obj);
-                            this.authService
-                                .storeDomainCredentialsToDB(credentials)
-                                .subscribe();
-                            this.addProjects();
-                        }
-                    },
-                    (error) => {
-                        if (error.status === 401) {
-                            this.error = 'Invalid username or password !';
-                        } else {
-                            this.error = error.statusText;
-                        }
+        this.authService
+            .checkDomainCredentials(
+                credentials.username,
+                credentials.password,
+                credentials.domain
+            )
+            .subscribe(
+                (response) => {
+                    if (response) {
+                        this.isAuthenticated = true;
+                        const obj = {
+                            domain: credentials.domain,
+                            credentials: {
+                                username: credentials.username,
+                                password: credentials.password,
+                            },
+                        };
+                        this.authService.domainsArray.push(obj);
+                        this.authService
+                            .storeDomainCredentialsToDB(credentials)
+                            .subscribe();
+                        this.addProjects();
                     }
-                );
-        } else {
-            this.error = 'Domain already added';
-        }
+                },
+                (error) => {
+                    if (error.status === 401) {
+                        this.error = 'Invalid username or password !';
+                    } else {
+                        this.error = error.statusText;
+                    }
+                }
+            );
     }
 
     addProjects() {
@@ -128,10 +124,7 @@ export class AddProjectModalComponent implements OnInit {
                         }
                     },
                     (error) => {
-                        if (error.status === 404) {
-                            this.error =
-                                'No project found with this project Key!';
-                        } else if (error.status === 401) {
+                        if (error.status === 401) {
                             this.error = 'Invalid username or password!';
                         } else {
                             this.error = error.status;
