@@ -8,8 +8,8 @@ import { AuthService } from './auth.service';
 export class DataService {
     constructor(private http: HttpClient, private authService: AuthService) {}
 
-    getAllProjects(user: string, pass: string) {
-        const url = `/jira/rest/api/2/project`;
+    getAllProjects(user: string, pass: string, domain: string) {
+        const url = `/${domain}/rest/api/2/project`;
         return this.http.get(
             url,
             this.authService.setDomainRequestHeaders(user, pass)

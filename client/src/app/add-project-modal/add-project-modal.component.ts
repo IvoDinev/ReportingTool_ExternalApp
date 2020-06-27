@@ -44,7 +44,15 @@ export class AddProjectModalComponent implements OnInit {
 
     onAuthenticate() {
         if (this.domainLoginForm.valid) {
-            this.authenticateInDomain();
+            if (
+                !this.authService.domainAdded(
+                    this.domainLoginForm.controls.domain.value
+                )
+            ) {
+                this.authenticateInDomain();
+            } else {
+                this.error = 'Domain added already !';
+            }
         } else {
             alert('Populate the required fields');
         }
@@ -61,13 +69,25 @@ export class AddProjectModalComponent implements OnInit {
 
     checkCredentials(credentials: DomainCredentials) {
         this.authService
-            .checkDomainCredentials(credentials.username, credentials.password)
+            .checkDomainCredentials(
+                credentials.username,
+                credentials.password,
+                credentials.domain
+            )
             .subscribe(
                 (response) => {
                     if (response) {
                         this.isAuthenticated = true;
+                        const obj = {
+                            domain: credentials.domain,
+                            credentials: {
+                                username: credentials.username,
+                                password: credentials.password,
+                            },
+                        };
+                        this.authService.domainsArray.push(obj);
                         this.authService
-                            .storeDomainCredentials(credentials)
+                            .storeDomainCredentialsToDB(credentials)
                             .subscribe();
                         this.addProjects();
                     }
@@ -87,13 +107,16 @@ export class AddProjectModalComponent implements OnInit {
             this.dataService
                 .getAllProjects(
                     this.domainLoginForm.controls.username.value,
-                    this.domainLoginForm.controls.password.value
+                    this.domainLoginForm.controls.password.value,
+                    this.domainLoginForm.controls.domain.value
                 )
                 .subscribe(
-                    (project) => {
-                        if (project) {
-                            console.log(project);
+                    (projects: Array<any>) => {
+                        if (projects) {
                             this.error = null;
+                            window.alert(
+                                `${projects.length} project(s) added from domain ${this.domainLoginForm.controls.domain.value}!`
+                            );
                             this.domainLoginForm.controls.username.setValue('');
                             this.domainLoginForm.controls.password.setValue('');
                             this.domainLoginForm.controls.domain.setValue('');
@@ -101,10 +124,7 @@ export class AddProjectModalComponent implements OnInit {
                         }
                     },
                     (error) => {
-                        if (error.status === 404) {
-                            this.error =
-                                'No project found with this project Key!';
-                        } else if (error.status === 401) {
+                        if (error.status === 401) {
                             this.error = 'Invalid username or password!';
                         } else {
                             this.error = error.status;

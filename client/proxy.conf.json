@@ -1,8 +1,14 @@
 {
+    "/avam": {
+        "target": "http://localhost:8080",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug"
+    },
     "/jira": {
         "target": "http://localhost:2990",
         "secure": false,
-        "changeOrigin": true,
+        "changeOrigin": false,
         "logLevel": "debug"
     }
 }

@@ -17,6 +17,7 @@ import { DomainCredentials } from '../interfaces/domainCredentials';
 export class AuthService {
     user = new BehaviorSubject<User>(null);
     private tokenExpirationTimer: any;
+    domainsArray = [];
 
     constructor(private http: HttpClient, private router: Router) {}
 
@@ -120,7 +121,7 @@ export class AuthService {
         return throwError(errorMessage);
     }
 
-    storeDomainCredentials(domainCredentials: DomainCredentials) {
+    storeDomainCredentialsToDB(domainCredentials: DomainCredentials) {
         const body = {
             username: domainCredentials.username,
             password: domainCredentials.password,
@@ -137,6 +138,28 @@ export class AuthService {
         );
     }
 
+    storeDomains(domains: Array<any>) {
+        for (const key in domains) {
+            if (domains.hasOwnProperty(key)) {
+                const object = {
+                    domain: key,
+                    credentials: domains[key],
+                };
+                this.domainsArray.push(object);
+            }
+        }
+    }
+
+    domainAdded(url: string): boolean {
+        let added = false;
+        this.domainsArray.forEach((element) => {
+            if (element.domain === url) {
+                added = true;
+            }
+        });
+        return added;
+    }
+
     getDomainCredentials() {
         return this.http.get<any>(
             `https://reportin-app---authentication.firebaseio.com/domains.json`
@@ -147,8 +170,8 @@ export class AuthService {
         return btoa(`${username}:${password}`);
     }
 
-    checkDomainCredentials(user: string, pass: string) {
-        const url = `/jira/rest/auth/1/session`;
+    checkDomainCredentials(user: string, pass: string, domain: string) {
+        const url = `/${domain}/rest/auth/1/session`;
         return this.http.get(url, this.setDomainRequestHeaders(user, pass));
     }
 

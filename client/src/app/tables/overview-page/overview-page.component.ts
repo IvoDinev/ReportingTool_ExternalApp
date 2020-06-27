@@ -14,7 +14,7 @@ export class OverviewPageComponent implements OnInit {
         this.authService.getDomainCredentials().subscribe(
             (domains: Array<DomainCredentials>) => {
                 if (domains) {
-                    console.log(domains);
+                    this.authService.storeDomains(domains);
                 } else {
                     window.alert('No projects added yet !');
                 }
