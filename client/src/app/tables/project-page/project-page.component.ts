@@ -15,7 +15,6 @@ export class ProjectPageComponent {
             start: new Date('01.03.2020'),
             plannedEnd: new Date('15.07.2020'),
             estimatedEnd: new Date('14.07.2020'),
-            scheduleVariance: '1 day(s) ahead',
             bugsRatio: 50,
             status: 'Ok',
         },

@@ -6,26 +6,32 @@
     <thead>
         <tr>
             <th id="project-name">Project</th>
-            <th id="expected-prg">Current fix version</th>
-            <th id="actual-prg">Completed epics %</th>
+            <th id="fix-version">Current fix version</th>
+            <th id="completed-epics">Completed epics %</th>
             <th id="start">Start Date</th>
             <th id="end">Planned End Date</th>
-            <th id="days">Estimated End Date</th>
-            <th id="tasks">Bugs/Completed Epics</th>
+            <th id="estimated-end">Estimated End Date</th>
+            <th id="bugs">Bugs/Completed Epics</th>
             <th id="status">Status</th>
         </tr>
     </thead>
     <tbody>
+        <div *ngIf="errorMessage" class="alert alert-danger">
+            <tr class="tableRow">
+                <p>{{ errorMessage }}</p>
+            </tr>
+        </div>
+        <!-- <div *ngFor="let project of projects"> -->
         <tr class="tableRow">
             <td headers="project-name">
                 Test project
             </td>
-            <td headers="expected-prg">RE 3.2</td>
-            <td headers="actual-prg">60%</td>
+            <td headers="fix-version">RE 3.2</td>
+            <td headers="completed-epics">60%</td>
             <td headers="start">01.03.2020</td>
             <td headers="end">25.07.2020</td>
-            <td headers="schedule">30.07.2020</td>
-            <td headers="tasks">30/40</td>
+            <td headers="estimated-end">30.07.2020</td>
+            <td headers="bugs">30/40</td>
             <td headers="status">
                 <i
                     class="fa fa-exclamation-triangle"
@@ -34,23 +40,6 @@
                 ></i>
             </td>
         </tr>
-        <tr class="tableRow">
-            <td headers="project-name">
-                Project
-            </td>
-            <td headers="expected-prg">RE 1.1</td>
-            <td headers="actual-prg">45%</td>
-            <td headers="start">01.03.2020</td>
-            <td headers="end">15.07.2020</td>
-            <td headers="schedule">14.07.2020</td>
-            <td headers="tasks">3/20</td>
-            <td headers="status">
-                <i
-                    class="fa fa-check"
-                    aria-hidden="true"
-                    style="color: green;"
-                ></i>
-            </td>
-        </tr>
+        <!-- </div> -->
     </tbody>
 </table>
