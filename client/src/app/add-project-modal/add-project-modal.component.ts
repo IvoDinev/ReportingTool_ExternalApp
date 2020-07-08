@@ -7,6 +7,7 @@ import { DomainCredentials } from '../interfaces/domainCredentials';
 import { Project } from '../interfaces/project';
 import { tap, concatMap } from 'rxjs/operators';
 import { BehaviorSubject, forkJoin } from 'rxjs';
+import { ProjectOverview } from '../interfaces/project-overview';
 
 @Component({
     // tslint:disable-next-line: component-selector
@@ -23,8 +24,11 @@ export class AddProjectModalComponent {
     currentFixVersion: string;
     currentFixVersionDate: Date;
     releaseDate: Date;
-    epics = [];
-    bugs = [];
+    estimatedRelease: Date;
+    completedEpicsRatio: number;
+    bugsRatio: string;
+    status: string;
+    project: ProjectOverview;
 
     constructor(
         private dataService: DataService,
@@ -183,6 +187,10 @@ export class AddProjectModalComponent {
     }
 
     getBugsAndEpics(key: string, credentials: DomainCredentials) {
+        let epics: any;
+        let bugs: any;
+        const completedEpics = [];
+        let remainingEpics: number;
         forkJoin([
             this.dataService.getAllEpics(
                 key,
@@ -191,9 +199,62 @@ export class AddProjectModalComponent {
             ),
             this.dataService.getBugs(key, this.currentFixVersion, credentials),
         ]).subscribe((results: any) => {
-            this.epics = results[0];
-            this.bugs = results[1];
+            epics = results[0];
+            bugs = results[1];
+            epics.issues.forEach((issue) => {
+                if (issue.fields.status.name === 'Done') {
+                    completedEpics.push(issue);
+                }
+            });
+            remainingEpics = epics.issues.length - completedEpics.length;
+            this.estimatedRelease = this.estimateRelease(
+                completedEpics,
+                remainingEpics
+            );
+            this.completedEpicsRatio =
+                completedEpics.length / epics.issues.length;
+            this.bugsRatio = `${completedEpics.length} / ${bugs.issues.length}`;
+            this.project = new ProjectOverview(
+                this.projectName,
+                this.currentFixVersion,
+                this.completedEpicsRatio,
+                this.currentFixVersionDate,
+                this.releaseDate,
+                this.estimatedRelease,
+                this.bugsRatio,
+                (this.status = this.setStatus())
+            );
+            console.log(this.project);
         });
+    }
+
+    estimateRelease(epics: Array<any>, uncompletedEpics: number): Date {
+        let totalTimeSpent = 0;
+        let avgTimePerEpic = 0;
+        let timeNeeded = 0;
+        let estimatedDate: Date;
+        epics.forEach((doneEpic) => {
+            totalTimeSpent += doneEpic.fields.timespent;
+        });
+        avgTimePerEpic = totalTimeSpent / epics.length;
+        timeNeeded = avgTimePerEpic * uncompletedEpics;
+        estimatedDate = new Date(new Date().getTime() + timeNeeded * 1000);
+        return estimatedDate;
+    }
+
+    setStatus(): string {
+        let icon: string;
+        if (this.releaseDate < this.estimatedRelease) {
+            icon = `<i
+            class="fa fa-exclamation-triangle"
+            aria-hidden="true"
+            style="color: red;"
+        ></i>`;
+        } else {
+            icon = `<i class="fa fa-check" aria-hidden="true"></i>`;
+        }
+
+        return icon;
     }
 
     clearModal() {
