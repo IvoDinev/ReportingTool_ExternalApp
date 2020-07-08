@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class OverviewPageComponent implements OnInit, OnDestroy {
     overviews = Array<ProjectOverview>();
+    projectsDataSub: Subscription;
     private errorSub: Subscription;
     errorMessage = null;
     constructor(
@@ -32,9 +33,19 @@ export class OverviewPageComponent implements OnInit, OnDestroy {
                 console.log(error);
             }
         );
-        this.errorSub = this.dataService.error.subscribe((errorMessage) => {
-            this.errorMessage = errorMessage;
-        });
+        this.errorSub = this.dataService.errorSubject.subscribe(
+            (errorMessage) => {
+                this.errorMessage = errorMessage;
+            }
+        );
+        this.projectsDataSub = this.dataService.projectSubject.subscribe(
+            (project: ProjectOverview) => {
+                if (project) {
+                    this.overviews.push(project);
+                    console.log(this.overviews);
+                }
+            }
+        );
     }
 
     ngOnDestroy() {

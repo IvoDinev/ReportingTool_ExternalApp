@@ -2,44 +2,38 @@
     <app-navigation></app-navigation>
 </div>
 <h2>Projects Overview</h2>
-<table class="aui">
+<table class="table table-striped">
     <thead>
         <tr>
-            <th id="project-name">Project</th>
-            <th id="fix-version">Current fix version</th>
-            <th id="completed-epics">Completed epics %</th>
-            <th id="start">Start Date</th>
-            <th id="end">Planned End Date</th>
-            <th id="estimated-end">Estimated End Date</th>
-            <th id="bugs">Bugs/Completed Epics</th>
-            <th id="status">Status</th>
+            <th scope="col" id="project-name">Project</th>
+            <th scope="col" id="fix-version">Current fix version</th>
+            <th scope="col" id="completed-epics">Completed epics %</th>
+            <th scope="col" id="start">Start Date</th>
+            <th scope="col" id="end">Planned End Date</th>
+            <th scope="col" id="estimated-end">Estimated End Date</th>
+            <th scope="col" id="bugs">Bugs/Completed Epics</th>
+            <th scope="col" id="status">Status</th>
         </tr>
     </thead>
     <tbody>
         <div *ngIf="errorMessage" class="alert alert-danger">
-            <tr class="tableRow">
+            <tr>
                 <p>{{ errorMessage }}</p>
             </tr>
         </div>
-        <!-- <div *ngFor="let project of projects"> -->
-        <tr class="tableRow">
+        <tr *ngFor="let project of overviews">
             <td headers="project-name">
-                Test project
+                {{ project.name }}
             </td>
-            <td headers="fix-version">RE 3.2</td>
-            <td headers="completed-epics">60%</td>
-            <td headers="start">01.03.2020</td>
-            <td headers="end">25.07.2020</td>
-            <td headers="estimated-end">30.07.2020</td>
-            <td headers="bugs">30/40</td>
-            <td headers="status">
-                <i
-                    class="fa fa-exclamation-triangle"
-                    aria-hidden="true"
-                    style="color: red;"
-                ></i>
+            <td headers="fix-version">{{ project.fixVersion }}</td>
+            <td headers="completed-epics">
+                {{ project.completedEpics * 100 }}%
             </td>
+            <td headers="start">{{ project.start | date }}</td>
+            <td headers="end">{{ project.plannedEnd | date }}</td>
+            <td headers="estimated-end">{{ project.estimatedEnd | date }}</td>
+            <td headers="bugs">{{ project.bugsRatio }}</td>
+            <td headers="status"></td>
         </tr>
-        <!-- </div> -->
     </tbody>
 </table>

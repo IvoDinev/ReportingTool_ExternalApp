@@ -1,29 +1,32 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { BehaviorSubject } from 'rxjs';
-
+import { BehaviorSubject, forkJoin } from 'rxjs';
 import { DomainCredentials } from '../interfaces/domainCredentials';
+import { Project } from '../interfaces/project';
+import { ProjectOverview } from '../interfaces/project-overview';
+import { concatMap, tap } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DataService {
     projectKeys = Array<string>();
-    error = new BehaviorSubject<string>(null);
+    errorSubject = new BehaviorSubject<string>(null);
+    error = null;
+    projectSubject = new BehaviorSubject<ProjectOverview>(null);
+    projectName: string;
+    currentFixVersion: string;
+    currentFixVersionDate: Date;
+    releaseDate: Date;
+    estimatedRelease: Date;
+    completedEpicsRatio: number;
+    bugsRatio: string;
+    status: string;
+    project: ProjectOverview;
+    iterator = 0;
 
     constructor(private http: HttpClient, private authService: AuthService) {}
-
-    getAllProjects(credentials: DomainCredentials) {
-        const url = `/${credentials.domain}/rest/api/2/project`;
-        return this.http.get(
-            url,
-            this.authService.setDomainRequestHeaders(
-                credentials.username,
-                credentials.password
-            )
-        );
-    }
 
     getKanbanBoard(projectKey: string, credentials: DomainCredentials) {
         const url = `/${credentials.domain}/rest/agile/1.0/board?projectKeyOrId=${projectKey}&type=Kanban`;
@@ -88,5 +91,154 @@ export class DataService {
                 credentials.password
             )
         );
+    }
+
+    getAllProjects(credentials: DomainCredentials) {
+        this.http
+            .get(
+                `/${credentials.domain}/rest/api/2/project`,
+                this.authService.setDomainRequestHeaders(
+                    credentials.username,
+                    credentials.password
+                )
+            )
+            .subscribe(
+                (projects: Array<Project>) => {
+                    if (projects) {
+                        this.error = null;
+                        projects.forEach((project) => {
+                            if (project.projectTypeKey === 'software') {
+                                this.projectKeys.push(project.key);
+                                this.projectName = project.name;
+                                this.getProjectData(project.key, credentials);
+                            }
+                        });
+                    }
+                },
+                (error) => {
+                    this.handleError(error);
+                }
+            );
+    }
+
+    getProjectData(key: string, credentials: DomainCredentials) {
+        let boardId: number;
+        this.getKanbanBoard(key, credentials)
+            .pipe(
+                tap((board: any) => {
+                    if (board && board.values.length > 0) {
+                        boardId = board.values[0].id;
+                    } else {
+                        const errorMessage = `Project with key ${key} does not have a Kanban Board!`;
+                        this.errorSubject.next(errorMessage);
+                    }
+                }),
+                concatMap(() => this.getFixVersions(credentials, boardId)),
+                tap((fixVersions: any) => {
+                    if (fixVersions) {
+                        fixVersions.values.forEach((fixVersion) => {
+                            this.getCurrentFixVersion(
+                                credentials,
+                                fixVersion.id
+                            ).subscribe((version: any) => {
+                                this.setCurrentFixVersion(version);
+                                if (
+                                    this.currentFixVersion !== undefined &&
+                                    this.iterator === 1
+                                ) {
+                                    this.getBugsAndEpics(key, credentials);
+                                }
+                            });
+                        });
+                    }
+                })
+            )
+            .subscribe();
+    }
+
+    setCurrentFixVersion(version: any) {
+        if (new Date(version.startDate) <= new Date()) {
+            this.currentFixVersionDate = new Date(version.startDate);
+            this.currentFixVersion = version.name;
+            this.releaseDate = new Date(version.releaseDate);
+            this.iterator = 1;
+        } else {
+            this.iterator = 0;
+        }
+    }
+
+    getBugsAndEpics(key: string, credentials: DomainCredentials) {
+        let epics: any;
+        let bugs: any;
+        const completedEpics = [];
+        let remainingEpics: number;
+        forkJoin([
+            this.getAllEpics(key, this.currentFixVersion, credentials),
+            this.getBugs(key, this.currentFixVersion, credentials),
+        ]).subscribe((results: any) => {
+            epics = results[0];
+            bugs = results[1];
+            epics.issues.forEach((issue) => {
+                if (issue.fields.status.name === 'Done') {
+                    completedEpics.push(issue);
+                }
+            });
+            remainingEpics = epics.issues.length - completedEpics.length;
+            this.estimatedRelease = this.estimateRelease(
+                completedEpics,
+                remainingEpics
+            );
+            this.completedEpicsRatio =
+                completedEpics.length / epics.issues.length;
+            this.bugsRatio = `${completedEpics.length} / ${bugs.issues.length}`;
+            this.project = new ProjectOverview(
+                this.projectName,
+                this.currentFixVersion,
+                this.completedEpicsRatio,
+                this.currentFixVersionDate,
+                this.releaseDate,
+                this.estimatedRelease,
+                this.bugsRatio,
+                (this.status = this.setStatus())
+            );
+            this.projectSubject.next(this.project);
+        });
+    }
+
+    estimateRelease(epics: Array<any>, uncompletedEpics: number): Date {
+        let totalTimeSpent = 0;
+        let avgTimePerEpic = 0;
+        let timeNeeded = 0;
+        let estimatedDate: Date;
+        epics.forEach((doneEpic) => {
+            totalTimeSpent += doneEpic.fields.timespent;
+        });
+        avgTimePerEpic = totalTimeSpent / epics.length;
+        timeNeeded = avgTimePerEpic * uncompletedEpics;
+        estimatedDate = new Date(new Date().getTime() + timeNeeded * 1000);
+        return estimatedDate;
+    }
+
+    setStatus(): string {
+        let icon: string;
+        if (this.releaseDate < this.estimatedRelease) {
+            icon = `<i
+            class="fa fa-exclamation-triangle"
+            aria-hidden="true"
+            style="color: red;"
+        ></i>`;
+        } else {
+            icon = `<i class="fa fa-check" aria-hidden="true"></i>`;
+        }
+
+        return icon;
+    }
+
+    handleError(error: any) {
+        if (error.status === 401) {
+            this.error = 'Invalid username or password!';
+        } else {
+            this.error = error.status;
+        }
     }
 }
