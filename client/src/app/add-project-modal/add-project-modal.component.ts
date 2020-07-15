@@ -4,7 +4,7 @@ import { DataService } from '../services/data.service';
 import { AuthService } from '../services/auth.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DomainCredentials } from '../interfaces/domainCredentials';
-import { BehaviorSubject, forkJoin } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     // tslint:disable-next-line: component-selector
@@ -49,7 +49,7 @@ export class AddProjectModalComponent {
                     this.domainLoginForm.controls.domain.value
                 )
             ) {
-                this.authenticateInDomain();
+                this.checkCredentials();
             } else {
                 this.error = 'Domain added already !';
             }
@@ -58,16 +58,12 @@ export class AddProjectModalComponent {
         }
     }
 
-    authenticateInDomain() {
+    checkCredentials() {
         const credentials = {
             username: this.domainLoginForm.controls.username.value,
             password: this.domainLoginForm.controls.password.value,
             domain: this.domainLoginForm.controls.domain.value,
         };
-        this.checkCredentials(credentials);
-    }
-
-    checkCredentials(credentials: DomainCredentials) {
         this.authService
             .checkDomainCredentials(
                 credentials.username,

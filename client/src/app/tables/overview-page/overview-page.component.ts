@@ -42,7 +42,6 @@ export class OverviewPageComponent implements OnInit, OnDestroy {
             (project: ProjectOverview) => {
                 if (project) {
                     this.overviews.push(project);
-                    console.log(this.overviews);
                 }
             }
         );

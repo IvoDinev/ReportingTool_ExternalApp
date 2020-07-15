@@ -27,7 +27,7 @@
             </td>
             <td headers="fix-version">{{ project.fixVersion }}</td>
             <td headers="completed-epics">
-                {{ project.completedEpics * 100 }}%
+                {{ project.completedEpics | number: '1.0-0' }}%
             </td>
             <td headers="start">{{ project.start | date }}</td>
             <td headers="end">{{ project.plannedEnd | date }}</td>

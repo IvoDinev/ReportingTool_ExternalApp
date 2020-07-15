@@ -15,10 +15,10 @@ export class DataService {
     errorSubject = new BehaviorSubject<string>(null);
     error = null;
     projectSubject = new BehaviorSubject<ProjectOverview>(null);
-    projectName: string;
-    currentFixVersion: string;
-    currentFixVersionDate: Date;
-    releaseDate: Date;
+    //projectName: string;
+    //currentFixVersion: string;
+    //currentFixVersionDate: Date;
+    //releaseDate: Date;
     estimatedRelease: Date;
     completedEpicsRatio: number;
     bugsRatio: string;
@@ -109,8 +109,11 @@ export class DataService {
                         projects.forEach((project) => {
                             if (project.projectTypeKey === 'software') {
                                 this.projectKeys.push(project.key);
-                                this.projectName = project.name;
-                                this.getProjectData(project.key, credentials);
+                                this.getProjectData(
+                                    project.key,
+                                    credentials,
+                                    project.name
+                                );
                             }
                         });
                     }
@@ -121,8 +124,14 @@ export class DataService {
             );
     }
 
-    getProjectData(key: string, credentials: DomainCredentials) {
+    getProjectData(
+        key: string,
+        credentials: DomainCredentials,
+        projectName: string
+    ) {
         let boardId: number;
+        const name = projectName;
+        let currentFixVersionData;
         this.getKanbanBoard(key, credentials)
             .pipe(
                 tap((board: any) => {
@@ -141,12 +150,20 @@ export class DataService {
                                 credentials,
                                 fixVersion.id
                             ).subscribe((version: any) => {
-                                this.setCurrentFixVersion(version);
+                                currentFixVersionData = this.setCurrentFixVersion(
+                                    version
+                                );
                                 if (
-                                    this.currentFixVersion !== undefined &&
+                                    currentFixVersionData !== undefined &&
+                                    currentFixVersionData !== null &&
                                     this.iterator === 1
                                 ) {
-                                    this.getBugsAndEpics(key, credentials);
+                                    this.setOverview(
+                                        key,
+                                        credentials,
+                                        name,
+                                        currentFixVersionData
+                                    );
                                 }
                             });
                         });
@@ -157,24 +174,38 @@ export class DataService {
     }
 
     setCurrentFixVersion(version: any) {
+        let fixVersionData: any;
         if (new Date(version.startDate) <= new Date()) {
-            this.currentFixVersionDate = new Date(version.startDate);
-            this.currentFixVersion = version.name;
-            this.releaseDate = new Date(version.releaseDate);
+            fixVersionData = {
+                startDate: new Date(version.startDate),
+                name: version.name,
+                releaseDate: new Date(version.releaseDate),
+            };
             this.iterator = 1;
+            return fixVersionData;
         } else {
             this.iterator = 0;
+            return null;
         }
     }
 
-    getBugsAndEpics(key: string, credentials: DomainCredentials) {
+    setOverview(
+        key: string,
+        credentials: DomainCredentials,
+        projectName: string,
+        fixVersionData: any
+    ) {
         let epics: any;
         let bugs: any;
         const completedEpics = [];
         let remainingEpics: number;
+        let estimatedRelease: Date;
+        let completedEpicsRatio: number;
+        let bugsRatio: string;
+        let status: string;
         forkJoin([
-            this.getAllEpics(key, this.currentFixVersion, credentials),
-            this.getBugs(key, this.currentFixVersion, credentials),
+            this.getAllEpics(key, fixVersionData.name, credentials),
+            this.getBugs(key, fixVersionData.name, credentials),
         ]).subscribe((results: any) => {
             epics = results[0];
             bugs = results[1];
@@ -184,22 +215,23 @@ export class DataService {
                 }
             });
             remainingEpics = epics.issues.length - completedEpics.length;
-            this.estimatedRelease = this.estimateRelease(
+            estimatedRelease = this.estimateRelease(
                 completedEpics,
                 remainingEpics
             );
-            this.completedEpicsRatio =
-                completedEpics.length / epics.issues.length;
-            this.bugsRatio = `${completedEpics.length} / ${bugs.issues.length}`;
+            completedEpicsRatio =
+                (completedEpics.length / epics.issues.length) * 100;
+            bugsRatio = `${bugs.issues.length} / ${completedEpics.length}`;
+
             this.project = new ProjectOverview(
-                this.projectName,
-                this.currentFixVersion,
-                this.completedEpicsRatio,
-                this.currentFixVersionDate,
-                this.releaseDate,
-                this.estimatedRelease,
-                this.bugsRatio,
-                (this.status = this.setStatus())
+                projectName,
+                fixVersionData.name,
+                completedEpicsRatio,
+                fixVersionData.startDate,
+                fixVersionData.releaseDate,
+                estimatedRelease,
+                bugsRatio,
+                (status = this.setStatus(fixVersionData))
             );
             this.projectSubject.next(this.project);
         });
@@ -219,9 +251,9 @@ export class DataService {
         return estimatedDate;
     }
 
-    setStatus(): string {
+    setStatus(fixVersionData): string {
         let icon: string;
-        if (this.releaseDate < this.estimatedRelease) {
+        if (fixVersionData.releaseDate < this.estimatedRelease) {
             icon = `<i
             class="fa fa-exclamation-triangle"
             aria-hidden="true"
