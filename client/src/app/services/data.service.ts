@@ -15,10 +15,6 @@ export class DataService {
     errorSubject = new BehaviorSubject<string>(null);
     error = null;
     projectSubject = new BehaviorSubject<ProjectOverview>(null);
-    //projectName: string;
-    //currentFixVersion: string;
-    //currentFixVersionDate: Date;
-    //releaseDate: Date;
     estimatedRelease: Date;
     completedEpicsRatio: number;
     bugsRatio: string;
@@ -252,18 +248,18 @@ export class DataService {
     }
 
     setStatus(fixVersionData): string {
-        let icon: string;
+        let status: string;
         if (fixVersionData.releaseDate < this.estimatedRelease) {
-            icon = `<i
-            class="fa fa-exclamation-triangle"
-            aria-hidden="true"
-            style="color: red;"
-        ></i>`;
+            status = 'Not OK';
+            //     icon = `<i
+            //     class="fa fa-exclamation-triangle fa-lg"
+            //     aria-hidden="true"
+            // ></i>`;
         } else {
-            icon = `<i class="fa fa-check" aria-hidden="true"></i>`;
+            status = 'OK';
+            //icon = `<i class="fa fa-check fa-lg" aria-hidden="true"></i>`;
         }
-
-        return icon;
+        return status;
     }
 
     handleError(error: any) {

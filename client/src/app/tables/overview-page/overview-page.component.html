@@ -12,7 +12,7 @@
             <th scope="col" id="end">Planned End Date</th>
             <th scope="col" id="estimated-end">Estimated End Date</th>
             <th scope="col" id="bugs">Bugs/Completed Epics</th>
-            <th scope="col" id="status">Status</th>
+            <th scope="col">Status</th>
         </tr>
     </thead>
     <tbody>
@@ -33,7 +33,7 @@
             <td headers="end">{{ project.plannedEnd | date }}</td>
             <td headers="estimated-end">{{ project.estimatedEnd | date }}</td>
             <td headers="bugs">{{ project.bugsRatio }}</td>
-            <td headers="status"></td>
+            <td id="status" [ngStyle]="style" [innerHTML]="icon"></td>
         </tr>
     </tbody>
 </table>

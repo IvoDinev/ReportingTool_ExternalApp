@@ -15,6 +15,8 @@ export class OverviewPageComponent implements OnInit, OnDestroy {
     projectsDataSub: Subscription;
     private errorSub: Subscription;
     errorMessage = null;
+    icon: string;
+    style: any;
     constructor(
         private authService: AuthService,
         private dataService: DataService
@@ -24,9 +26,20 @@ export class OverviewPageComponent implements OnInit, OnDestroy {
         this.authService.getDomainCredentials().subscribe(
             (domains: Array<DomainCredentials>) => {
                 if (domains) {
+                    let credentials: DomainCredentials;
+                    Object.keys(domains).forEach((key) => {
+                        credentials = {
+                            domain: key,
+                            username: domains[key].username,
+                            password: domains[key].password,
+                        };
+                        this.dataService.getAllProjects(credentials);
+                    });
+
                     this.authService.storeDomains(domains);
                 } else {
                     window.alert('No projects added yet !');
+                    this.errorMessage = 'No projects to display!';
                 }
             },
             (error) => {
@@ -41,6 +54,16 @@ export class OverviewPageComponent implements OnInit, OnDestroy {
         this.projectsDataSub = this.dataService.projectSubject.subscribe(
             (project: ProjectOverview) => {
                 if (project) {
+                    if (project.status === 'OK') {
+                        this.icon = `<i class="fa fa-check fa-lg" aria-hidden="true"></i>`;
+                        this.style = { color: 'green' };
+                    } else {
+                        this.icon = `<i
+                        //     class="fa fa-exclamation-triangle fa-lg"
+                        //     aria-hidden="true"
+                        // ></i>`;
+                        this.style = { color: 'red' };
+                    }
                     this.overviews.push(project);
                 }
             }
