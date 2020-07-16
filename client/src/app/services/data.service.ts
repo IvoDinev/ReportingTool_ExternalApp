@@ -251,13 +251,8 @@ export class DataService {
         let status: string;
         if (fixVersionData.releaseDate < this.estimatedRelease) {
             status = 'Not OK';
-            //     icon = `<i
-            //     class="fa fa-exclamation-triangle fa-lg"
-            //     aria-hidden="true"
-            // ></i>`;
         } else {
             status = 'OK';
-            //icon = `<i class="fa fa-check fa-lg" aria-hidden="true"></i>`;
         }
         return status;
     }
