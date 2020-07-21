@@ -1,11 +1,12 @@
-export interface ProjectOverview {
-    name: string;
-    fixVersion: string;
-    completedEpics: number;
-    start: Date;
-    plannedEnd: Date;
-    estimatedEnd: Date;
-    scheduleVariance: string;
-    bugsRatio: number;
-    status: string;
+export class ProjectOverview {
+    constructor(
+        public name: string,
+        public fixVersion: string,
+        public completedEpics: number,
+        public start: Date,
+        public plannedEnd: Date,
+        public estimatedEnd: Date,
+        public bugsRatio: string,
+        public status: string
+    ) {}
 }

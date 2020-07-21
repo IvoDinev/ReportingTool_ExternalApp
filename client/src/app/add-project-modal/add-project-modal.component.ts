@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataService } from '../services/data.service';
 import { AuthService } from '../services/auth.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DomainCredentials } from '../interfaces/domainCredentials';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     // tslint:disable-next-line: component-selector
@@ -11,10 +12,11 @@ import { DomainCredentials } from '../interfaces/domainCredentials';
     templateUrl: './add-project-modal.component.html',
     styleUrls: ['./add-project-modal.component.css'],
 })
-export class AddProjectModalComponent implements OnInit {
+export class AddProjectModalComponent {
     error = null;
     isAuthenticated = false;
     closeResult = '';
+    errorSubject = new BehaviorSubject<string>(null);
 
     constructor(
         private dataService: DataService,
@@ -26,8 +28,6 @@ export class AddProjectModalComponent implements OnInit {
         password: new FormControl('', Validators.required),
         domain: new FormControl('', Validators.required),
     });
-
-    ngOnInit() {}
 
     open(content) {
         this.modalService
@@ -49,7 +49,7 @@ export class AddProjectModalComponent implements OnInit {
                     this.domainLoginForm.controls.domain.value
                 )
             ) {
-                this.authenticateInDomain();
+                this.checkCredentials();
             } else {
                 this.error = 'Domain added already !';
             }
@@ -58,16 +58,12 @@ export class AddProjectModalComponent implements OnInit {
         }
     }
 
-    authenticateInDomain() {
+    checkCredentials() {
         const credentials = {
             username: this.domainLoginForm.controls.username.value,
             password: this.domainLoginForm.controls.password.value,
             domain: this.domainLoginForm.controls.domain.value,
         };
-        this.checkCredentials(credentials);
-    }
-
-    checkCredentials(credentials: DomainCredentials) {
         this.authService
             .checkDomainCredentials(
                 credentials.username,
@@ -89,48 +85,34 @@ export class AddProjectModalComponent implements OnInit {
                         this.authService
                             .storeDomainCredentialsToDB(credentials)
                             .subscribe();
-                        this.addProjects();
+                        this.addProjects(credentials);
                     }
                 },
                 (error) => {
-                    if (error.status === 401) {
-                        this.error = 'Invalid username or password !';
-                    } else {
-                        this.error = error.statusText;
-                    }
+                    this.handleError(error);
                 }
             );
     }
 
-    addProjects() {
+    addProjects(credentials: DomainCredentials) {
         if (this.isAuthenticated) {
-            this.dataService
-                .getAllProjects(
-                    this.domainLoginForm.controls.username.value,
-                    this.domainLoginForm.controls.password.value,
-                    this.domainLoginForm.controls.domain.value
-                )
-                .subscribe(
-                    (projects: Array<any>) => {
-                        if (projects) {
-                            this.error = null;
-                            window.alert(
-                                `${projects.length} project(s) added from domain ${this.domainLoginForm.controls.domain.value}!`
-                            );
-                            this.domainLoginForm.controls.username.setValue('');
-                            this.domainLoginForm.controls.password.setValue('');
-                            this.domainLoginForm.controls.domain.setValue('');
-                            this.modalService.dismissAll();
-                        }
-                    },
-                    (error) => {
-                        if (error.status === 401) {
-                            this.error = 'Invalid username or password!';
-                        } else {
-                            this.error = error.status;
-                        }
-                    }
-                );
+            this.dataService.getAllProjects(credentials);
+            this.clearModal();
+        }
+    }
+
+    clearModal() {
+        this.domainLoginForm.controls.username.setValue('');
+        this.domainLoginForm.controls.password.setValue('');
+        this.domainLoginForm.controls.domain.setValue('');
+        this.modalService.dismissAll();
+    }
+
+    handleError(error: any) {
+        if (error.status === 401) {
+            this.error = 'Invalid username or password!';
+        } else {
+            this.error = error.status;
         }
     }
 }
