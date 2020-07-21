@@ -54,16 +54,6 @@ export class OverviewPageComponent implements OnInit, OnDestroy {
         this.projectsDataSub = this.dataService.projectSubject.subscribe(
             (project: ProjectOverview) => {
                 if (project) {
-                    if (project.status === 'OK') {
-                        this.icon = `<i class="fa fa-check fa-lg" aria-hidden="true"></i>`;
-                        this.style = { color: 'green' };
-                    } else {
-                        this.icon = `<i
-                        //     class="fa fa-exclamation-triangle fa-lg"
-                        //     aria-hidden="true"
-                        // ></i>`;
-                        this.style = { color: 'red' };
-                    }
                     this.overviews.push(project);
                 }
             }

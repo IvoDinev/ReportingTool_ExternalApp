@@ -33,7 +33,11 @@
             <td headers="end">{{ project.plannedEnd | date }}</td>
             <td headers="estimated-end">{{ project.estimatedEnd | date }}</td>
             <td headers="bugs">{{ project.bugsRatio }}</td>
-            <td id="status" [ngStyle]="style" [innerHTML]="icon"></td>
+            <td
+                id="status"
+                [ngStyle]="project.status.style"
+                [innerHTML]="project.status.icon"
+            ></td>
         </tr>
     </tbody>
 </table>

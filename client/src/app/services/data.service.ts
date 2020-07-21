@@ -15,10 +15,6 @@ export class DataService {
     errorSubject = new BehaviorSubject<string>(null);
     error = null;
     projectSubject = new BehaviorSubject<ProjectOverview>(null);
-    estimatedRelease: Date;
-    completedEpicsRatio: number;
-    bugsRatio: string;
-    status: string;
     project: ProjectOverview;
     iterator = 0;
 
@@ -227,7 +223,7 @@ export class DataService {
                 fixVersionData.releaseDate,
                 estimatedRelease,
                 bugsRatio,
-                (status = this.setStatus(fixVersionData))
+                (status = this.setStatus(fixVersionData, estimatedRelease))
             );
             this.projectSubject.next(this.project);
         });
@@ -247,13 +243,20 @@ export class DataService {
         return estimatedDate;
     }
 
-    setStatus(fixVersionData): string {
-        let status: string;
-        if (fixVersionData.releaseDate < this.estimatedRelease) {
-            status = 'Not OK';
+    setStatus(fixVersionData, estimatedRelease): string {
+        let status;
+        if (fixVersionData.releaseDate < estimatedRelease) {
+            status = {
+                icon: `<i class="fa fa-exclamation-triangle fa-lg" aria-hidden="true"></i>`,
+                style: { color: 'red' },
+            };
         } else {
-            status = 'OK';
+            status = {
+                icon: `<i class="fa fa-check fa-lg" aria-hidden="true"></i>`,
+                style: { color: 'green' },
+            };
         }
+
         return status;
     }
 
